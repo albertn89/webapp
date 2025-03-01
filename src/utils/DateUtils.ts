@@ -21,7 +21,7 @@ class DateUtils {
 		const month = months[date.getMonth()];
 		const year = date.getFullYear();
 
-		return `${dayName}, ${day} ${month} ${year}`;
+		return `${dayName}, ${month} ${day}, ${year}`;
 	}
 
 	static formatDateString(dateString: string) {
