@@ -1,30 +1,53 @@
 import { useFormik } from "formik";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Dropdown from "../../components/Dropdown";
 import { Expense } from "../../model/Expense";
-import { saveOrUpdateExpense } from "../../services/expense-service";
+import { getExpenseByExpenseId, saveOrUpdateExpense } from "../../services/expense-service";
 import { expenseCategories } from "../../utils/AppConstants";
 import expenseValidationSchema from "../../validation/expenseValidationSchema";
 
 const NewExpense = () => {
 	const navigate = useNavigate();
+	const { expenseId } = useParams<{ expenseId: string }>();
+
 	const [error, setError] = useState<string>("");
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [initialValues, setInitialValues] = useState<Expense>({
+		name: "",
+		amount: 0,
+		note: "",
+		category: "",
+		date: new Date().toISOString().split("T")[0],
+	});
+
+	useEffect(() => {
+		if (expenseId) {
+			setIsLoading(true);
+
+			// call the service method to get the existing expense
+			getExpenseByExpenseId(expenseId)
+				.then((response) => {
+					if (response && response.data) {
+						setInitialValues(response.data);
+					}
+				})
+				.catch((error) => setError(error.message))
+				.finally(() => setIsLoading(false));
+		}
+	}, [expenseId]);
 
 	const formik = useFormik({
-		initialValues: {
-			name: "",
-			amount: 0,
-			note: "",
-			category: "",
-			date: new Date().toISOString().split("T")[0],
-		},
+		initialValues,
+		enableReinitialize: true,
 		onSubmit: (values: Expense) => {
 			saveOrUpdateExpense(values)
 				.then((response) => {
 					if (response && response.status === 201) {
 						navigate("/");
+					} else if (response && response.status === 200) {
+						navigate(`/view/${expenseId}`);
 					}
 				})
 				.catch((error) => {
@@ -39,6 +62,7 @@ const NewExpense = () => {
 		<div className="d-flex justify-content-center align-items-center mt-2">
 			<div className="container col-md-4 col-sm-8 col-xs-12">
 				{error && <p className="text-danger">{error}</p>}
+				{isLoading && <p>Loading...</p>}
 				<form onSubmit={formik.handleSubmit}>
 					<div className="mb-3">
 						<label htmlFor="name" className="form-label">
