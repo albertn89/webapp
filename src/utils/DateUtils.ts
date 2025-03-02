@@ -26,7 +26,8 @@ class DateUtils {
 
 	static formatDateString(dateString: string) {
 		if (dateString != undefined) {
-			const date = new Date(dateString);
+			const [year, month, day] = dateString.split("-").map(Number);
+			const date = new Date(year, month - 1, day);
 			return new Intl.DateTimeFormat("en-US", {
 				year: "numeric",
 				month: "long",
