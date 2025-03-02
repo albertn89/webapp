@@ -26,7 +26,7 @@ const Navbar = () => {
 						Login
 					</NavLink>
 					<NavLink className="btn btn-sm btn-outline-light mx-1" to="/register">
-						Logout
+						Register
 					</NavLink>
 					<button
 						className="navbar-toggler"
